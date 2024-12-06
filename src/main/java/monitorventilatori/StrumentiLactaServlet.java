@@ -33,7 +33,7 @@ public class StrumentiLactaServlet extends HttpServlet {
 				
 			Statement stmt = conn.createStatement();
 
-			ResultSet rs = stmt.executeQuery("SELECT MODELLO, STRUMENTO, MIN_DATA_INIZ, MAX_DATA_INIZ FROM stato_ventilatori")) {
+			ResultSet rs = stmt.executeQuery("SELECT MODELLO, STRUMENTO, MIN_DATA_INIZIO, MAX_DATA_INIZIO FROM STRUMENTI_DATI_VV_LACTA")) {
 			
 			System.out.println(" ==>> Query Eseguita! ");
 
@@ -41,8 +41,8 @@ public class StrumentiLactaServlet extends HttpServlet {
 				HashMap<String, Object> record = new HashMap<>();
 				record.put("modello", rs.getString("MODELLO"));
 				record.put("strumento", rs.getString("STRUMENTO"));
-				record.put("min_data_iniz", rs.getDate("MIN_DATA_INIZ"));
-				record.put("max_data_iniz", rs.getDate("MAX_DATA_INIZ"));
+				record.put("min_data_iniz", rs.getDate("MIN_DATA_INIZIO"));
+				record.put("max_data_iniz", rs.getDate("MAX_DATA_INIZIO"));
 				dati.add(record);
 			}
 		} catch (SQLException e) {
