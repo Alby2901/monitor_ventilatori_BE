@@ -11,55 +11,94 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import com.google.gson.Gson;
 
 @WebServlet("/statoventilatori")
 public class StrumentiLactaServlet extends HttpServlet {
-	private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;
+    
+    private static final Logger logger = Logger.getLogger(StrumentiLactaServlet.class.getName());
 
-	@Override
-	protected void doGet(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		// Imposta il tipo di contenuto come JSON
-		response.setContentType("application/json");
-		PrintWriter out = response.getWriter();
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws ServletException, IOException {
+        // Imposta il tipo di contenuto come JSON
+        response.setContentType("application/json");
+        PrintWriter out = response.getWriter();
 
-		// Logica per connettersi al database (MySQL o Oracle)
-		List<HashMap<String, Object>> dati = new ArrayList<>();
+        ConfigLoader configLoader = new ConfigLoader(getServletContext());
+        String dbServer;
+        
+        
+        // Ottieni il parametro "db" dall'URL
+        String db = request.getParameter("db");
+        if (db == null || db.isEmpty()) {
+        	
+        	dbServer = configLoader.getProperty("dbServer").toLowerCase();
+        	
+//            response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+//            out.print("{\"error\":\"Parametro 'db' mancante\"}");
+//            return;
+        } else {
+        	
+        	dbServer = db.toLowerCase();
+        }
+        
+        logger.log(Level.INFO, "Database Server selezionato: " + dbServer);
+        // System.out.println("Database Server selezionato: " + dbServer);
+        
+        String viewProp = dbServer + ".view";
+        logger.log(Level.INFO, "View property: " + viewProp);
+        // System.out.println("View proporties: " + viewProp);
+        
+        String view = configLoader.getProperty(viewProp);
+        logger.log(Level.INFO, " ==>> Vista utilizzata: " + view);
+        // System.out.println(" ==>> vista utilizzata: " + view);
+        
+        
+        String query = "SELECT MODELLO, STRUMENTO, MIN_DATA_INIZIO, MAX_DATA_INIZIO FROM " + view;
+        logger.log(Level.INFO, " ==>> Query completa utilizzata: " + query);
+        // System.out.println(" ==>> Query completa utilizzata: " + query);
+        
+        
+        // Logica per connettersi al database (MySQL o Oracle)
+        List<HashMap<String, Object>> dati = new ArrayList<>();
+        logger.log(Level.INFO, " ==>> Inizio della connessione alla API...");
+        // System.out.println(" ==>> Inizio della connessione alla API... ");
 
-		System.out.println(" ==>> Inizio della connessione alla API... ");
+        try (Connection conn = DatabaseConnection.createConnection(getServletContext(), dbServer);
+                
+            Statement stmt = conn.createStatement();
+        	
+            ResultSet rs = stmt.executeQuery(query)) {
+            
+        	logger.log(Level.INFO, " ==>> Query Eseguita!");
+            //System.out.println(" ==>> Query Eseguita! ");
 
-		try (Connection conn = DatabaseConnection.createConnection(getServletContext());
-				
-			Statement stmt = conn.createStatement();
+            while (rs.next()) {
+                HashMap<String, Object> record = new HashMap<>();
+                record.put("modello", rs.getString("MODELLO"));
+                record.put("strumento", rs.getString("STRUMENTO"));
+                record.put("min_data_iniz", rs.getDate("MIN_DATA_INIZIO"));
+                record.put("max_data_iniz", rs.getDate("MAX_DATA_INIZIO"));
+                dati.add(record);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+            out.print("{\"error\":\"Database error\"}");
+            return;
+        }
 
-			ResultSet rs = stmt.executeQuery("SELECT MODELLO, STRUMENTO, MIN_DATA_INIZIO, MAX_DATA_INIZIO FROM STRUMENTI_DATI_VV_LACTA")) {
-			
-			System.out.println(" ==>> Query Eseguita! ");
+        // Converte i dati in JSON e li invia come risposta
+        Gson gson = new Gson();
+        out.print(gson.toJson(dati));
+    }
 
-			while (rs.next()) {
-				HashMap<String, Object> record = new HashMap<>();
-				record.put("modello", rs.getString("MODELLO"));
-				record.put("strumento", rs.getString("STRUMENTO"));
-				record.put("min_data_iniz", rs.getDate("MIN_DATA_INIZIO"));
-				record.put("max_data_iniz", rs.getDate("MAX_DATA_INIZIO"));
-				dati.add(record);
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			out.print("{\"error\":\"Database error\"}");
-			return;
-		}
-
-		// Converte i dati in JSON e li invia come risposta
-		Gson gson = new Gson();
-		out.print(gson.toJson(dati));
-	}
-
-	@Override
-	public void destroy() {
-		// Rilascia le risorse, se necessario
-	}
-
+    @Override
+    public void destroy() {
+        // Rilascia le risorse, se necessario
+    }
 }
