@@ -46,11 +46,11 @@ public class StrumentiLactaServlet extends HttpServlet {
         	dbServer = db.toLowerCase();
         }
         
-        logger.log(Level.INFO, "Database Server selezionato: " + dbServer);
+        logger.log(Level.INFO, " ==>> Database Server selezionato: " + dbServer);
         // System.out.println("Database Server selezionato: " + dbServer);
         
         String viewProp = dbServer + ".view";
-        logger.log(Level.INFO, "View property: " + viewProp);
+        logger.log(Level.INFO, " ==>> View property: " + viewProp);
         // System.out.println("View proporties: " + viewProp);
         
         String view = configLoader.getProperty(viewProp);

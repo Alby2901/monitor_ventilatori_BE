@@ -18,7 +18,7 @@ public class DatabaseConnection {
     	ConfigLoader configLoader = new ConfigLoader(context);
         
         String dbServer = dbServerP;
-        logger.info("Database Server selezionato: " + dbServer);
+        logger.info(" ==>> database Server selezionato: " + dbServer);
 
         String url, username, password;
 
@@ -44,16 +44,16 @@ public class DatabaseConnection {
 	        }
 
         } catch (ClassNotFoundException e) {
-            logger.log(Level.SEVERE, "Driver JDBC non trovato: " + e.getMessage(), e);
+            logger.log(Level.SEVERE, " ==>> Driver JDBC non trovato: " + e.getMessage(), e);
             throw new RuntimeException("Driver JDBC non trovato: " + e.getMessage(), e);
         }
 	        
 	        
         try {
-            logger.info("Tentativo di connessione al database: " + url);
+            logger.info(" ==>> Tentativo di connessione al database: " + url);
             return DriverManager.getConnection(url, username, password);
         } catch (SQLException e) {
-            logger.log(Level.SEVERE, "Errore durante la connessione al database: " + e.getMessage(), e);
+            logger.log(Level.SEVERE, " ==>> Errore durante la connessione al database: " + e.getMessage(), e);
             throw new RuntimeException("Impossibile connettersi al database", e);
         }
     }
