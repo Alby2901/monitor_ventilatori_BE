@@ -77,12 +77,18 @@ public class StrumentiLactaServlet extends HttpServlet {
         	logger.log(Level.INFO, " ==>> Query Eseguita!");
             //System.out.println(" ==>> Query Eseguita! ");
 
+//        	Timestamp timestamp;
+        	
             while (rs.next()) {
                 HashMap<String, Object> record = new HashMap<>();
+//                timestamp = rs.getTimestamp("MIN_DATA_INIZIO");
+//                System.out.println("Data completa: " + timestamp);
+//                System.out.println("Data: " + timestamp.toLocalDateTime().toLocalDate());
+//                System.out.println("Ora: " + timestamp.toLocalDateTime().toLocalTime());
                 record.put("modello", rs.getString("MODELLO"));
                 record.put("strumento", rs.getString("STRUMENTO"));
-                record.put("min_data_iniz", rs.getDate("MIN_DATA_INIZIO"));
-                record.put("max_data_iniz", rs.getDate("MAX_DATA_INIZIO"));
+                record.put("min_data_iniz", rs.getTimestamp("MIN_DATA_INIZIO"));
+                record.put("max_data_iniz", rs.getTimestamp("MAX_DATA_INIZIO"));
                 dati.add(record);
             }
         } catch (SQLException e) {
